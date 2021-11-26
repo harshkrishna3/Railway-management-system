@@ -83,7 +83,7 @@ class RailwayManagement:
                     if stn == station_to:
                         end = i
                         break
-                stations = stations[start:end+1]
+                stations = stations[start:end]
                 filled_seats = list()
                 for stn in stations:
                     csr.execute("select count(*) from seat_booked where train_no = {0} and travel_date = '{1}' and stn_code = '{2}'".format(train_no, travel_date, stn))
@@ -92,5 +92,48 @@ class RailwayManagement:
 
             finally:
                 self._closeDB()
+
+    def book_ticket(self, psg_name, stn_frm, stn_to, travel_date, train_no):
+        if self.seat_availability(stn_frm, stn_to, train_no, travel_date) < 0:
+            raise ValueError('No available seats in the train')
+        try:
+            csr = self._connectDB()
+            csr.execute("insert into ticket(booked_by, psg_name) values('{0}', '{1}')".format(self.user, psg_name))
+            self.db.commit()
+            csr.execute('select last_insert_id()')
+            pnr = csr.fetchone()[0]
+
+
+            csr.execute("select stn_code from time_table where train_no = {0}".format(train_no))
+            stations = list(map(lambda x:x[0], csr.fetchall()))
+            for i, stn in enumerate(stations):
+                if stn == stn_frm:
+                    start = i
+                if stn == stn_to:
+                    end = i
+                    break
+            stations = stations[start:end]
+            
+            #get suitable seat_sqn for most efficiency
+            csr.execute("select count(*), seat_sqn from seat_booked where train_no = '{0}' and travel_date = '{1}' group by seat_sqn having seat_sqn not in (select distinct seat_sqn from seat_booked where stn_code in ({2}))".format(train_no, travel_date, ', '.join(map(lambda x: "'"+x+"'", stations))))
+            try:
+                seat_sqn = max(csr.fetchall())[1]
+            except ValueError:
+                #assign new seat
+                csr.execute('select distinct seat_sqn from seat_booked where train_no = {0} and travel_date = \'{1}\''.format(train_no, travel_date))
+                all_seat = set(range(1, 721))
+                filled_seat = set(map(lambda x:x[0], csr.fetchall()))
+                seat_sqn = min(all_seat - filled_seat)
+            
+            #booking seat_sqn for all stations travelled
+            for stn in stations:
+                csr.execute("insert into seat_booked values ({0}, '{1}', {2}, '{3}', '{4}')".format(pnr, stn, seat_sqn, travel_date, train_no))
+                self.db.commit()
+            return pnr, seat_sqn
+            
+            
+            # csr.execute("insert into ticket (booked_by, psg_name) values ('{0}', '{1}')".format(self.user, psg_name))
+        finally:
+            self._closeDB()
 
 
