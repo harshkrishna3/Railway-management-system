@@ -19,6 +19,31 @@ class RailwayManagement:
     def _closeDB(self):
         self.db.close()
 
+    def log_in(self):
+        try:
+            csr = self._connectDB()
+            # abc = self.db
+        finally:
+            self._closeDB()
+
+    def sign_up(self, user, psw, name, dob, mob, email = None, address = None):
+        try:
+            csr = self._connectDB()
+            fields = ['username', 'password', 'name', 'dob', 'mobile']
+            values = [user, psw, name, dob, mob]
+            if email is not None:
+                fields.append('email')
+                values.append(email)
+            if address is not None:
+                fields.append('address')
+                values.append(address)
+            csr.execute("create user '{0}'@'localhost' identified by '{1}'".format(user, psw))
+            csr.execute('insert into User ({0}) values ({1})'.format(', '.join(fields), ', '.join(map(lambda x: '\''+x+'\'', values))))
+            self.db.commit()
+
+        finally:
+            self._closeDB()
+
     def show_train_details(self, train_no):
         try:
             csr = self._connectDB()
@@ -26,7 +51,18 @@ class RailwayManagement:
             details = csr.fetchone()
             all_details = {'train_no': details[0], 'name': details[1], 'total_coach': details[2], 'running_days': details[3]}
             csr.execute('select * from time_table where train_no = 12309 order by day_no, ifnull(arrival, departure) + ifnull(departure, arrival)')
-            all_details['time_table'] = csr.fetchall()
+            time_table_temp = csr.fetchall()
+            all_details['time_table'] = []
+            for row in time_table_temp:
+                try:
+                    arrival = str(row[2])
+                except AttributeError:
+                    arrival = None
+                try:
+                    departure = str(row[3])
+                except AttributeError:
+                    departure = None
+                all_details['time_table'].append((*row[0:2], arrival, departure, row[4:]))
             return all_details
 
         finally:
@@ -55,9 +91,9 @@ class RailwayManagement:
                     csr.execute('select name from trains where train_no = {0}'.format(train))
                     train_info['train_no'] = train
                     train_info['name'] = csr.fetchone()
-                    train_info['arrival'] = arrival
+                    train_info['arrival'] = str(arrival)
                     train_info['day_no_frm'] = day_no_from
-                    train_info['departure'] = departure
+                    train_info['departure'] = str(departure)
                     train_info['day_no_to'] = day_no_to
                     pot_trains.append(train_info)
             return pot_trains
@@ -67,6 +103,27 @@ class RailwayManagement:
     def _train_runs_on_day(self, travel_date, days):
         day = date.fromisoformat(travel_date).weekday()
         return bool(int(days[day]))
+    
+    def check_pnr(self, pnr):
+        try:
+            csr = self._connectDB()
+            csr.execute("select * from ticket where pnr = {0}".format(pnr))
+            ticket = dict()
+            _, ticket['booked_by'], ticket['psg_name'] = csr.fetchone()
+            csr.execute("select stn_code from seat_booked where pnr = {0}".format(pnr))
+            stations = list(map(lambda x:x[0], csr.fetchall()))
+            csr.execute("select distinct seat_sqn, travel_date, train_no from seat_booked where pnr = {0}".format(pnr))
+            ticket['seat_sqn'], ticket['travel_date'], ticket['train_no'] = csr.fetchone()
+            ticket['travel_date'] = ticket['travel_date'].isoformat()
+            csr.fetchall()
+        finally:
+            self._closeDB()
+        stn_visited_by_train = list(map(lambda x:x[0], self.show_train_details(ticket['train_no'])['time_table']))
+        stations.sort(key= lambda x:stn_visited_by_train.index(x))
+        ticket['first_stn'] = stations[0]
+        ticket['last_stn'] = stn_visited_by_train[stn_visited_by_train.index(stations[-1])+1]
+        return ticket, 200
+
 
     def seat_availability(self, station_frm, station_to, train_no, travel_date):
             try:
