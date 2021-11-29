@@ -179,6 +179,8 @@ class RailwayManagement:
     def book_ticket(self, psg_name, stn_frm, stn_to, travel_date, train_no):
         if self.seat_availability(stn_frm, stn_to, train_no, travel_date) < 0:
             raise ValueError('No available seats in the train')
+        stn_frm = self._get_station_code(stn_frm)
+        stn_to = self._get_station_code(stn_to)
         try:
             csr = self._connectDB()
             csr.execute("insert into ticket(booked_by, psg_name) values('{0}', '{1}')".format(self.user, psg_name))

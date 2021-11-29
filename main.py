@@ -71,11 +71,12 @@ class TrainBwStations(Resource):
         return stations
 
 class BookTicket(Resource):
-    def put(self):
-        vals = request.form
-        railway = RailwayManagement(vals['user'], vals['psw'])
-        pnr, seat_sqn = railway.book_ticket(vals['psg_name'], vals['frm'], vals['to'], vals['travel_date'], vals['train_no'])
-        return {'pnr': pnr, 'coach': seat_sqn//72, 'seat': seat_sqn%72}, 201
+    def get(self, user, psw, psg_name, frm, to, train_no, travel_date):
+        # print(frm, to)
+        # vals = request.form
+        railway = RailwayManagement(user, psw)
+        pnr, seat_sqn = railway.book_ticket(psg_name, frm, to, travel_date, train_no)
+        return {'pnr': pnr, 'coach': (seat_sqn//72) + 1, 'seat': seat_sqn%72}, 201
         
 
 api.add_resource(LogIn, '/login/<string:user>/<string:password>')
@@ -84,7 +85,7 @@ api.add_resource(CheckPnr, '/pnr/<int:pnr>')
 api.add_resource(Route, '/route/<int:train_no>')
 api.add_resource(SeatAvaiibilty, '/seat-availibility/<string:frm>/<string:to>/<string:train_no>/<string:travel_date>')
 api.add_resource(TrainBwStations, '/train-bw-stations/<string:frm>/<string:to>')
-api.add_resource(BookTicket, '/book')
+api.add_resource(BookTicket, '/book/<string:user>/<string:psw>/<string:psg_name>/<string:frm>/<string:to>/<string:train_no>/<string:travel_date>')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

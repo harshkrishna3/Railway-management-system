@@ -28,42 +28,45 @@
 
 
         }
-         
+
         /* navbar */
-        .navbar{
+        .navbar {
             background-color: indigo;
             /* border-radius: 4px; */
         }
 
-        .navbar ul{
-            overflow: auto;         /*This will prevent floating of li out of parent*/
+        .navbar ul {
+            overflow: auto;
+            /*This will prevent floating of li out of parent*/
             display: flex;
             /* align-items: center; */
             justify-content: center;
         }
 
 
-        .navbar li{
-            float:left;
+        .navbar li {
+            float: left;
             list-style: none;
-            margin: 14px 6px        /*margin in li increases size of ul*/
+            margin: 14px 6px
+                /*margin in li increases size of ul*/
         }
 
 
-        .navbar li a{
+        .navbar li a {
             font-size: 21px;
             text-decoration: none;
-            padding: 6px 13px;      /*padding in a increases size of a*/
+            padding: 6px 13px;
+            /*padding in a increases size of a*/
             color: white;
         }
 
-        .navbar li a:hover{
+        .navbar li a:hover {
             color: rgb(196, 238, 9);
             font-weight: bolder;
             /* background-color: plum; */
         }
 
-        .navbar li a:active{
+        .navbar li a:active {
             color: rgb(196, 238, 9);
             font-weight: bolder;
             /* background-color: plum; */
@@ -82,6 +85,8 @@
             margin: 7% auto;
             opacity: .85;
             width: 46%;
+            flex-direction: column;
+            align-items: center;
         }
 
         .opener {
@@ -106,6 +111,7 @@
             width: 372px;
             padding: 3px 0px;
         }
+
         .form-grp label {
             font-weight: 700;
         }
@@ -114,7 +120,7 @@
         .btn-box {
             display: flex;
             justify-content: center;
-            
+
             margin: 25px 0px;
         }
 
@@ -138,7 +144,7 @@
             background: white;
             flex-direction: column;
             align-items: center;
-    
+
             justify-content: center;
             padding: 20px 15px 55px 15px;
             border-radius: 15px;
@@ -147,33 +153,61 @@
             width: 80%;
         }
 
-        table{
+        table {
             width: 100%;
             padding: 12px 0px 12px 0px;
         }
 
-        thead{
+        thead {
             background-color: indigo;
             /* background-color: indigo 0.85; */
             color: white;
             font-weight: 600;
         }
 
-        th, td{
+        th,
+        td {
             padding: 12px 0px 12px 0px;
             text-align: center;
             border-radius: 7px;
         }
-        
-        .table-head{
+
+        .table-head {
             padding: 12px 0px 12px 0px;
         }
-        
-        tbody{
+
+        tbody {
             background: rgb(196, 238, 9);
             font-weight: 500;
-        }        
-        
+        }
+
+        .booked-data {
+            margin: 64px 0px 55px 0px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .block {
+            width: 41%;
+            margin: 15px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+        }
+        .block input{
+            outline: none;
+            border: 0px;
+            border-bottom: 1px solid green;
+            /* background-color:indigo; */
+            display: block;
+            margin: 7px;
+            width: 372px;
+            padding: 3px 0px;
+            width: 55%;
+
+        }
+
     </style>
 </head>
 
@@ -188,35 +222,37 @@
             <li><a href="seat_availability.html">Seat Availability</a></li>
             <li><a href="ticket-reservation.html">Ticket Reservation</a></li>
             <li><a href="pnr status.html">PNR Status</a></li>
-           
+
         </ul>
     </nav>
 
     <div class="container">
         <form action="">
-            <div class="opener">Ticket Availability</div>
+            <div class="opener">Ticket Reservation</div>
             <div class="form-grp">
                 <label for="for_date-for-travel">Date of travel</label>
                 <input type="date" name="" id="for_date-for-travel" placeholder="Enter Travelling Date">
             </div>
-            
+
 
             <div class="form-grp">
                 <label for="for_stations_from">Starting Station</label>
-                <input pattern="[A-Za-z]+" type="text" name="" id="for_stations_from" placeholder="Enter Source station">
+                <input pattern="[A-Za-z]+" type="text" name="" id="for_stations_from"
+                    placeholder="Enter Source station">
             </div>
-            
-            
+
+
             <div class="form-grp">
                 <label for="for_stations_to">Destination Station</label>
-                <input pattern="[A-Za-z]+" type="text" name="" id="for_stations_to" placeholder="Enter Destination station">
-                
+                <input pattern="[A-Za-z]+" type="text" name="" id="for_stations_to"
+                    placeholder="Enter Destination station">
+
             </div>
 
 
 
             <div class="btn-box">
-                <button class="btn" type="submit" onclick="ticket-reservation()">Submit</button>
+                <button class="btn" type="button" onclick="ticket_reservation()">Submit</button>
                 <button class="btn" type="reset">Reset</button>
 
             </div>
@@ -224,30 +260,73 @@
     </div>
     <div class="table">
         <div class="opener">Booking Details</div>
-        <table>
+        <table id = 'table'>
             <thead class="table-head">
                 <tr>
                     <th class="table-head-data">Train No.</th>
                     <th class="table-head-data">Name</th>
-                    <th class="table-head-data">Arrival</th>
-                    <th class="table-head-data">Arrival Day</th>
                     <th class="table-head-data">Departure</th>
                     <th class="table-head-data">Departure Day</th>
+                    <th class="table-head-data">Arrival</th>
+                    <th class="table-head-data">Arrival Day</th>
+                    <th class="table-head-data">Available Seats</th>
                 </tr>
             </thead>
-            <tbody class="table-body">
+            <tbody class="table-body" id = 'table-body'>
                 <tr>
-                    <td class="table-data">1</td>
-                    <td class="table-data">2</td>
-                    <td class="table-data">3</td>
-                    <td class="table-data">Lorem, ipsum.
-                    </td>
-                    <td class="table-data">5</td>
-                    <td class="table-data">6</td>
+                    
                 </tr>
             </tbody>
         </table>
     </div>
+
+    <div class="container">
+        <form action="">
+            <div class="opener">Enter Booking Details</div>
+            <div class="form-grp">
+                <label for="for_username">Username</label>
+                <input pattern="[a-zA-Z0-9]+" type="text" name="" id="for_username" placeholder="Enter UserName">
+                <!-- for username to accept alphanumeric values
+                    pattern="[a-zA-Z0-9]+"
+                 -->
+            </div>
+            <div class="form-grp">
+                <label for="for_password">Password</label>
+                <input type="password" name="" id="for_password" placeholder="Enter Password">
+            </div>
+            <div class="form-grp">
+                <label for="for_train-no">Enter Train No.:</label>
+                <input pattern="[0-9]+" type="text" name="" id="for_train-no" placeholder="Enter train Number">
+            </div>
+            
+            <div class="form-grp">
+                <label for="for_passgn-name">Passenger Name</label>
+                <input pattern="[A-Za-z]+" type="text" name="" id="for_passgn-name" placeholder="Enter Passenger Name">
+            </div>
+            <div class="btn-box">
+                <button class="btn" type="button" onclick="book()">Submit</button>
+                <button class="btn" type="reset">Reset</button>
+
+            </div>
+        </form>
+        <!-- showing data -->
+        <div class="booked-data">
+            <div class="block">
+                <label for="for_pnr-no">PNR No.: &nbsp;</label>
+                <input type="text" name="" id="for_pnr-no" placeholder="" readonly>
+            </div>
+            <div class="block"><label for="for_seat-no">Seat No.: &nbsp;</label>
+                <input type="text" name="" id="for_seat-no" placeholder="" readonly>
+            </div>
+            <div class="block"><label for="for_coach-no">Coach: &nbsp;</label>
+                <input type="text" name="" id="coach" placeholder="" readonly>
+            </div>
+           
+            
+        </div>
+    </div>
+
+
 </body>
 
 </html>
