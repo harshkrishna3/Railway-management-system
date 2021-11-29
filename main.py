@@ -18,7 +18,6 @@ class LogIn(Resource):
         except AttributeError:
             return {'msg': 'error'}, 401
 
-# @app.route('/')
 class SignUp(Resource):
     def get(self, user, password, name, dob, mob, email=None, address=None):
         # vals = request.form

@@ -52,24 +52,27 @@ class RailwayManagement:
             all_details = {'train_no': details[0], 'name': details[1], 'total_coach': details[2], 'running_days': details[3]}
             csr.execute('select * from time_table where train_no = 12309 order by day_no, ifnull(arrival, departure) + ifnull(departure, arrival)')
             time_table_temp = csr.fetchall()
-            all_details['time_table'] = []
-            for row in time_table_temp:
-                try:
-                    arrival = str(row[2])
-                except AttributeError:
-                    arrival = None
-                try:
-                    departure = str(row[3])
-                except AttributeError:
-                    departure = None
-                all_details['time_table'].append((*row[0:2], arrival, departure, *row[4:]))
                 # print(all_details)
-            return all_details
 
         finally:
             self._closeDB()
+        
+        all_details['time_table'] = []
+        for row in time_table_temp:
+            try:
+                arrival = str(row[2])
+            except AttributeError:
+                arrival = None
+            try:
+                departure = str(row[3])
+            except AttributeError:
+                departure = None
+            all_details['time_table'].append((self._get_station_name(row[0]), row[1], arrival, departure, *row[4:]))
+        return all_details
 
     def train_bw_stations(self, station_frm, station_to):
+        station_frm = self._get_station_code(station_frm)
+        station_to = self._get_station_code(station_to)
         try:
             pot_trains = list()
             csr = self._connectDB()
@@ -104,6 +107,24 @@ class RailwayManagement:
     def _train_runs_on_day(self, travel_date, days):
         day = date.fromisoformat(travel_date).weekday()
         return bool(int(days[day]))
+
+    def _get_station_code(self, name):
+        try:
+            csr = self._connectDB()
+            csr.execute("select code from stations where name = '{}'".format(name))
+            code = csr.fetchone()[0]
+            return code
+        finally:
+            self._closeDB()
+
+    def _get_station_name(self, code):
+        try:
+            csr = self._connectDB()
+            csr.execute("select name from stations where code = '{}'".format(code))
+            name = csr.fetchone()[0]
+            return name
+        finally:
+            self._closeDB()
     
     def check_pnr(self, pnr):
         try:
@@ -119,38 +140,41 @@ class RailwayManagement:
             csr.fetchall()
         finally:
             self._closeDB()
-        stn_visited_by_train = list(map(lambda x:x[0], self.show_train_details(ticket['train_no'])['time_table']))
+        stn_visited_by_train = list(map(lambda x:self._get_station_code(x[0]), self.show_train_details(ticket['train_no'])['time_table']))
+        print(stn_visited_by_train)
         stations.sort(key= lambda x:stn_visited_by_train.index(x))
-        ticket['first_stn'] = stations[0]
-        ticket['last_stn'] = stn_visited_by_train[stn_visited_by_train.index(stations[-1])+1]
+        ticket['first_stn'] = self._get_station_name(stations[0])
+        ticket['last_stn'] = self._get_station_name(stn_visited_by_train[stn_visited_by_train.index(stations[-1])+1])
         print(type(ticket))
         return ticket
 
 
     def seat_availability(self, station_frm, station_to, train_no, travel_date):
-            try:
-                csr = self._connectDB()
-                csr.execute('select total_coach, days from trains where train_no = {0}'.format(train_no))
-                total_coach, days = csr.fetchone()
-                if not self._train_runs_on_day(travel_date, days):
-                    raise ValueError('Train doesnt run on entered day')
-                csr.execute("select stn_code from time_table where train_no = {0}".format(train_no))
-                stations = list(map(lambda x:x[0], csr.fetchall()))
-                for i, stn in enumerate(stations):
-                    if stn == station_frm:
-                        start = i
-                    if stn == station_to:
-                        end = i
-                        break
-                stations = stations[start:end]
-                filled_seats = list()
-                for stn in stations:
-                    csr.execute("select count(*) from seat_booked where train_no = {0} and travel_date = '{1}' and stn_code = '{2}'".format(train_no, travel_date, stn))
-                    filled_seats.append(csr.fetchone()[0])
-                return total_coach*72 - max(filled_seats)
+        station_frm = self._get_station_code(station_frm)
+        station_to = self._get_station_code(station_to)
+        try:
+            csr = self._connectDB()
+            csr.execute('select total_coach, days from trains where train_no = {0}'.format(train_no))
+            total_coach, days = csr.fetchone()
+            if not self._train_runs_on_day(travel_date, days):
+                raise ValueError('Train doesnt run on entered day')
+            csr.execute("select stn_code from time_table where train_no = {0}".format(train_no))
+            stations = list(map(lambda x:x[0], csr.fetchall()))
+            for i, stn in enumerate(stations):
+                if stn == station_frm:
+                    start = i
+                if stn == station_to:
+                    end = i
+                    break
+            stations = stations[start:end]
+            filled_seats = list()
+            for stn in stations:
+                csr.execute("select count(*) from seat_booked where train_no = {0} and travel_date = '{1}' and stn_code = '{2}'".format(train_no, travel_date, stn))
+                filled_seats.append(csr.fetchone()[0])
+            return total_coach*72 - max(filled_seats)
 
-            finally:
-                self._closeDB()
+        finally:
+            self._closeDB()
 
     def book_ticket(self, psg_name, stn_frm, stn_to, travel_date, train_no):
         if self.seat_availability(stn_frm, stn_to, train_no, travel_date) < 0:
