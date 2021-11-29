@@ -162,3 +162,70 @@ train_betn_stations = function(){
     }
     xhr.send()
 }
+ticket_reservation = function(){
+    date = document.getElementById('for_date-for-travel').value
+    frm = document.getElementById('for_stations_from').value
+    to = document.getElementById('for_stations_to').value
+    url_bw_stations = 'http://127.0.0.1:5000/train-bw-stations/'+frm+'/'+to
+    const xhr = new XMLHttpRequest()
+    xhr.open("GET", url_bw_stations)
+    xhr.response = 'json'
+    table = document.getElementById('table-body')
+    // console.log(table.rows.length)
+    for(let i =0; i<=table.rows.length; i++){
+        table.deleteRow(-1)
+    }
+    xhr.onload = ()=>{
+        const data = JSON.parse(xhr.response)
+        seat = new Array(data.length)
+        for(let i = 0; i<data.length; i++){
+            console.log(data[i]['seat'])
+            // console.log(seat[i])
+            row = table.insertRow(i)
+            row.insertCell(0).innerHTML = data[i]['train_no']
+            row.insertCell(1).innerHTML = data[i]['name']
+            row.insertCell(2).innerHTML = data[i]['departure']
+            row.insertCell(3).innerHTML = data[i]['day_no_frm']
+            row.insertCell(4).innerHTML = data[i]['arrival']
+            row.insertCell(5).innerHTML = data[i]['day_no_to']
+        }
+        for(let i = 0; i<data.length; i++){
+            const xhr1 = new XMLHttpRequest()
+            url_seat = 'http://127.0.0.1:5000/seat-availibility/'+frm+'/'+to+'/'+data[i]['train_no']+'/'+date
+            xhr1.open("GET", url_seat)
+            xhr1.response = 'json'
+            xhr1.onload = () =>{
+                seat = JSON.parse(xhr1.response)['avail']
+                console.log(seat)
+                table.rows[i].insertCell(6).innerHTML = seat
+            }
+            xhr1.send()
+        }
+    }
+    xhr.send()
+}
+book = function(){
+    user = document.getElementById('for_username').value
+    psw = hashCode(document.getElementById('for_password').value)
+    psg = document.getElementById('for_passgn-name').value
+    date = document.getElementById('for_date-for-travel').value
+    frm = document.getElementById('for_stations_from').value
+    to = document.getElementById('for_stations_to').value
+    train_no = document.getElementById('for_train-no').value
+    console.log(user, psw, psg, date, frm, to, train_no)
+    url = 'http://127.0.0.1:5000/book/'+user+'/'+psw+'/'+psg+'/'+frm+'/'+to+'/'+train_no+'/'+date
+    const xhr = new XMLHttpRequest()
+    xhr.open("GET", url)
+    xhr.response = 'json'
+    xhr.onload = ()=>{
+        data = JSON.parse(xhr.response)
+        console.log(data)
+        document.getElementById('for_pnr-no').value = data['pnr']
+        document.getElementById('for_seat-no').value = data['seat']
+        document.getElementById('coach').value = data['coach']
+        console.log('why')
+    }
+    xhr.send()
+
+
+}

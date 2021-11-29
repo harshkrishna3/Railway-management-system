@@ -52,6 +52,12 @@ class Route(Resource):
     def get(self, train_no):
         railway = RailwayManagement('guest', 'guest')
         train = railway.show_train_details(train_no)
+        days = []
+        week = 'SMTWTFS'
+        for i, day in enumerate(train['running_days']):
+            if int(day):
+                days.append(week[i])
+        train['running_days'] = ''.join(days)
         # print(train)
         return train
 
@@ -88,4 +94,4 @@ api.add_resource(TrainBwStations, '/train-bw-stations/<string:frm>/<string:to>')
 api.add_resource(BookTicket, '/book/<string:user>/<string:psw>/<string:psg_name>/<string:frm>/<string:to>/<string:train_no>/<string:travel_date>')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

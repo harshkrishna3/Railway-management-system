@@ -50,7 +50,7 @@ class RailwayManagement:
             csr.execute('select * from trains where train_no = {0}'.format(train_no))
             details = csr.fetchone()
             all_details = {'train_no': details[0], 'name': details[1], 'total_coach': details[2], 'running_days': details[3]}
-            csr.execute('select * from time_table where train_no = 12309 order by day_no, ifnull(arrival, departure) + ifnull(departure, arrival)')
+            csr.execute("select * from time_table where train_no = '{}' order by day_no, ifnull(arrival, departure) + ifnull(departure, arrival)".format(train_no))
             time_table_temp = csr.fetchall()
                 # print(all_details)
 
@@ -140,8 +140,11 @@ class RailwayManagement:
             csr.fetchall()
         finally:
             self._closeDB()
+        print(ticket['train_no'])
         stn_visited_by_train = list(map(lambda x:self._get_station_code(x[0]), self.show_train_details(ticket['train_no'])['time_table']))
         print(stn_visited_by_train)
+        print(stations)
+        print('\n'*3)
         stations.sort(key= lambda x:stn_visited_by_train.index(x))
         ticket['first_stn'] = self._get_station_name(stations[0])
         ticket['last_stn'] = self._get_station_name(stn_visited_by_train[stn_visited_by_train.index(stations[-1])+1])
