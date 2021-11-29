@@ -62,7 +62,8 @@ class RailwayManagement:
                     departure = str(row[3])
                 except AttributeError:
                     departure = None
-                all_details['time_table'].append((*row[0:2], arrival, departure, row[4:]))
+                all_details['time_table'].append((*row[0:2], arrival, departure, *row[4:]))
+                # print(all_details)
             return all_details
 
         finally:
@@ -90,7 +91,7 @@ class RailwayManagement:
                     train_info = dict()
                     csr.execute('select name from trains where train_no = {0}'.format(train))
                     train_info['train_no'] = train
-                    train_info['name'] = csr.fetchone()
+                    train_info['name'] = csr.fetchone()[0]
                     train_info['arrival'] = str(arrival)
                     train_info['day_no_frm'] = day_no_from
                     train_info['departure'] = str(departure)
@@ -122,7 +123,8 @@ class RailwayManagement:
         stations.sort(key= lambda x:stn_visited_by_train.index(x))
         ticket['first_stn'] = stations[0]
         ticket['last_stn'] = stn_visited_by_train[stn_visited_by_train.index(stations[-1])+1]
-        return ticket, 200
+        print(type(ticket))
+        return ticket
 
 
     def seat_availability(self, station_frm, station_to, train_no, travel_date):

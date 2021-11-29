@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Reservation</title>
+    <script type="text/javascript" src="script.js"></script>
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        body {
+            background: url(train_bg.jpg) no-repeat center center/cover;
+            /* width:100%;
+            height:100%; */
+        }
+
+        .container {
+            display: flex;
+            width: 57%;
+            margin: 13% auto;
+            background: white;
+            /* align-items: center; */
+
+
+        }
+         
+        /* navbar */
+        .navbar{
+            background-color: indigo;
+            /* border-radius: 4px; */
+        }
+
+        .navbar ul{
+            overflow: auto;         /*This will prevent floating of li out of parent*/
+            display: flex;
+            /* align-items: center; */
+            justify-content: center;
+        }
+
+
+        .navbar li{
+            float:left;
+            list-style: none;
+            margin: 14px 6px        /*margin in li increases size of ul*/
+        }
+
+
+        .navbar li a{
+            font-size: 21px;
+            text-decoration: none;
+            padding: 6px 13px;      /*padding in a increases size of a*/
+            color: white;
+        }
+
+        .navbar li a:hover{
+            color: rgb(196, 238, 9);
+            font-weight: bolder;
+            /* background-color: plum; */
+        }
+
+        .navbar li a:active{
+            color: rgb(196, 238, 9);
+            font-weight: bolder;
+            /* background-color: plum; */
+        }
+
+        /* navbar ends */
+
+
+
+        /* here are the changes that i made after passing the file to surya
+        */
+        .container {
+            justify-content: center;
+            padding: 20px 15px 55px 15px;
+            border-radius: 15px;
+            margin: 7% auto;
+            opacity: .85;
+            width: 46%;
+        }
+
+        .opener {
+            display: block;
+            margin: 54px auto;
+            font-size: 25px;
+            text-align: center;
+            font-weight: bolder;
+        }
+
+        .form-grp {
+            margin: 15px;
+        }
+
+        .form-grp input,
+        .form-grp select {
+            outline: none;
+            border: 0px;
+            border-bottom: 1px solid green;
+            display: block;
+            margin: 7px 0px;
+            width: 372px;
+            padding: 3px 0px;
+        }
+        .form-grp label {
+            font-weight: 700;
+        }
+
+
+        .btn-box {
+            display: flex;
+            justify-content: center;
+            
+            margin: 25px 0px;
+        }
+
+        .btn {
+            margin: 10px 30px;
+            border: 0px;
+            background: rgb(196, 238, 9);
+            padding: 9px 26px;
+            border-radius: 15px;
+        }
+
+        .btn:hover {
+            font-weight: bolder;
+            background-color: indigo;
+            color: white;
+        }
+
+        .table {
+            display: flex;
+            /* height: 650px; */
+            background: white;
+            flex-direction: column;
+            align-items: center;
+    
+            justify-content: center;
+            padding: 20px 15px 55px 15px;
+            border-radius: 15px;
+            margin: 7% auto;
+            opacity: .85;
+            width: 80%;
+        }
+
+        table{
+            width: 100%;
+            padding: 12px 0px 12px 0px;
+        }
+
+        thead{
+            background-color: indigo;
+            /* background-color: indigo 0.85; */
+            color: white;
+            font-weight: 600;
+        }
+
+        th, td{
+            padding: 12px 0px 12px 0px;
+            text-align: center;
+            border-radius: 7px;
+        }
+        
+        .table-head{
+            padding: 12px 0px 12px 0px;
+        }
+        
+        tbody{
+            background: rgb(196, 238, 9);
+            font-weight: 500;
+        }        
+        
+    </style>
+</head>
+
+<body>
+    <!-- navbar -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="index.html" id="onclick">Home</a></li>
+            <li><a href="signup.html">Sign Up</a></li>
+            <li><a href="routechecking.html">Route Checking</a></li>
+            <li><a href="train_betn_stations.html">Train Between Stations</a></li>
+            <li><a href="seat_availability.html">Seat Availability</a></li>
+            <li><a href="ticket-reservation.html">Ticket Reservation</a></li>
+            <li><a href="pnr status.html">PNR Status</a></li>
+           
+        </ul>
+    </nav>
+
+    <div class="container">
+        <form action="">
+            <div class="opener">Ticket Availability</div>
+            <div class="form-grp">
+                <label for="for_date-for-travel">Date of travel</label>
+                <input type="date" name="" id="for_date-for-travel" placeholder="Enter Travelling Date">
+            </div>
+            
+
+            <div class="form-grp">
+                <label for="for_stations_from">Starting Station</label>
+                <input pattern="[A-Za-z]+" type="text" name="" id="for_stations_from" placeholder="Enter Source station">
+            </div>
+            
+            
+            <div class="form-grp">
+                <label for="for_stations_to">Destination Station</label>
+                <input pattern="[A-Za-z]+" type="text" name="" id="for_stations_to" placeholder="Enter Destination station">
+                
+            </div>
+
+
+
+            <div class="btn-box">
+                <button class="btn" type="submit" onclick="ticket-reservation()">Submit</button>
+                <button class="btn" type="reset">Reset</button>
+
+            </div>
+        </form>
+    </div>
+    <div class="table">
+        <div class="opener">Booking Details</div>
+        <table>
+            <thead class="table-head">
+                <tr>
+                    <th class="table-head-data">Train No.</th>
+                    <th class="table-head-data">Name</th>
+                    <th class="table-head-data">Arrival</th>
+                    <th class="table-head-data">Arrival Day</th>
+                    <th class="table-head-data">Departure</th>
+                    <th class="table-head-data">Departure Day</th>
+                </tr>
+            </thead>
+            <tbody class="table-body">
+                <tr>
+                    <td class="table-data">1</td>
+                    <td class="table-data">2</td>
+                    <td class="table-data">3</td>
+                    <td class="table-data">Lorem, ipsum.
+                    </td>
+                    <td class="table-data">5</td>
+                    <td class="table-data">6</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
